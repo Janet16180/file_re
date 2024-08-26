@@ -1,0 +1,16 @@
+[package]
+name = "file_re"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "file_re"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = "0.22.2"
+flate2 = "1.0"
+regex = "1.10.6"
+xz2 = "0.1"
+
