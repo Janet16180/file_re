@@ -11,5 +11,10 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dynamic = ["version"]
+
 [tool.maturin]
+python-source = "python"
+module-name = "file_re._file_re"
+bindings = "pyo3"
 features = ["pyo3/extension-module"]
+

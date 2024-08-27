@@ -48,7 +48,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "file_re"
+name = "file_re_rust"
 version = "0.1.0"
 dependencies = [
  "flate2",
