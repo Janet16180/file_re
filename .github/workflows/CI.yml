@@ -47,9 +47,8 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          working-directory: file_re
           name: wheels-linux-${{ matrix.platform.target }}
-          path: dist
+          path: ${{ github.workspace }}/file_re/dist
       - name: pytest
         if: ${{ startsWith(matrix.platform.target, 'x86_64') }}
         shell: bash
@@ -60,7 +59,7 @@ jobs:
           pip install file_re --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
           pip install pytest
           cd ${{ github.workspace }}/unit_tests
-          pytest
+          pytest -v
       - name: pytest
         if: ${{ !startsWith(matrix.platform.target, 'x86') && matrix.platform.target != 'ppc64' }}
         uses: uraimo/run-on-arch-action@v2
@@ -75,8 +74,8 @@ jobs:
           run: |
             set -e
             pip3 install file_re --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
-            cd unit_tests
-            pytest
+            cd ${{ github.workspace }}/unit_tests
+            pytest -v
 
   musllinux:
     runs-on: ${{ matrix.platform.runner }}
@@ -107,9 +106,8 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          working-directory: file_re
           name: wheels-musllinux-${{ matrix.platform.target }}
-          path: dist
+          path: ${{ github.workspace }}/file_re/dist
       - name: pytest
         if: ${{ startsWith(matrix.platform.target, 'x86_64') }}
         uses: addnab/docker-run-action@v3
@@ -121,9 +119,10 @@ jobs:
             apk add py3-pip py3-virtualenv
             python3 -m virtualenv .venv
             source .venv/bin/activate
-            pip install file_re --no-index --find-links dist --force-reinstall
+            pip install file_re --no-index --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
             pip install pytest
-            pytest
+            cd ${{ github.workspace }}/unit_tests
+            pytest -v
       - name: pytest
         if: ${{ !startsWith(matrix.platform.target, 'x86') }}
         uses: uraimo/run-on-arch-action@v2
@@ -138,8 +137,9 @@ jobs:
             python3 -m virtualenv .venv
             source .venv/bin/activate
             pip install pytest
-            pip install file_re --find-links dist --force-reinstall
-            pytest
+            pip install file_re --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
+            cd ${{ github.workspace }}/unit_tests
+            pytest -v
 
   windows:
     runs-on: ${{ matrix.platform.runner }}
@@ -166,9 +166,8 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          working-directory: file_re
           name: wheels-windows-${{ matrix.platform.target }}
-          path: dist
+          path: ${{ github.workspace }}/file_re/dist
       - name: pytest
         if: ${{ !startsWith(matrix.platform.target, 'aarch64') }}
         shell: bash
@@ -176,9 +175,10 @@ jobs:
           set -e
           python3 -m venv .venv
           source .venv/Scripts/activate
-          pip install file_re --find-links dist --force-reinstall
+          pip install file_re --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
           pip install pytest
-          pytest
+          cd ${{ github.workspace }}/unit_tests
+          pytest -v
 
   macos:
     runs-on: ${{ matrix.platform.runner }}
@@ -204,17 +204,17 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          working-directory: file_re
           name: wheels-macos-${{ matrix.platform.target }}
-          path: dist
+          path: ${{ github.workspace }}/file_re/dist
       - name: pytest
         run: |
           set -e
           python3 -m venv .venv
           source .venv/bin/activate
-          pip install file_re --find-links dist --force-reinstall
+          pip install file_re --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
           pip install pytest
-          pytest
+          cd ${{ github.workspace }}/unit_tests
+          pytest -v
 
   sdist:
     runs-on: ubuntu-latest
@@ -229,6 +229,5 @@ jobs:
       - name: Upload sdist
         uses: actions/upload-artifact@v4
         with:
-          working-directory: file_re
           name: wheels-sdist
-          path: dist
+          path: ${{ github.workspace }}/file_re/dist
