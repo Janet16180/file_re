@@ -1,4 +1,4 @@
-from ._file_re import search_line_by_line
+from ._file_re import search_line_by_line, find_all
 
 
 class Match:
@@ -43,10 +43,10 @@ class Match:
         return self.__matchs_dict
     
     def __str__(self):
-        return self.__match_str
+        return f"<file_re.Match object; span={self.__span}, match='{self.__match_str}'>"
     
     def __repr__(self):
-        return f"<file_re.Match object; span={self.span}, match='{self.__match_str}'>"
+        return f"<file_re.Match object; span={self.__span}, match='{self.__match_str}'>"
                 
 
 class file_re:
@@ -59,12 +59,26 @@ class file_re:
         if result:
 
             match = Match(
-                match_str=result.match_str(),
-                start=result.start(),
-                end=result.end(),
-                matchs_list=result.groups(),
-                matchs_dict=result.named_groups()
+                match_str=result.match_str,
+                start=result.start,
+                end=result.end,
+                matchs_list=result.groups,
+                matchs_dict=result.named_groups,
             )
+
+        return match
+    
+    @staticmethod
+    def findall(regex, file_path):
+        match_list = find_all(regex, file_path)
+
+        match = None
+        if match_list:
+            if len(match_list[0]) == 1:
+                match = [item for sublist in match_list for item in sublist]
+            else:
+                match = [tuple(item) for sublist in match_list for item in sublist]
+        
         return match
 
 __all__ = [file_re]
