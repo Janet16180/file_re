@@ -119,7 +119,7 @@ jobs:
             apk add py3-pip py3-virtualenv
             python3 -m virtualenv .venv
             source .venv/bin/activate
-            pip install file_re --no-index --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
+            pip install file_re --no-index --find-links ${{ github.workspace }}/dist --force-reinstall
             pip install pytest
             cd ${{ github.workspace }}/unit_tests
             pytest -v
@@ -137,7 +137,7 @@ jobs:
             python3 -m virtualenv .venv
             source .venv/bin/activate
             pip install pytest
-            pip install file_re --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
+            pip install file_re --find-links ${{ github.workspace }}/dist --force-reinstall
             cd ${{ github.workspace }}/unit_tests
             pytest -v
 
@@ -175,9 +175,9 @@ jobs:
           set -e
           python3 -m venv .venv
           source .venv/Scripts/activate
-          pip install file_re --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
+          pip install file_re --find-links ${{ github.workspace }}\file_re\dist --force-reinstall
           pip install pytest
-          cd ${{ github.workspace }}/unit_tests
+          cd ${{ github.workspace }}\unit_tests
           pytest -v
 
   macos:
