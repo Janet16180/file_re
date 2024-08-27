@@ -47,6 +47,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
+          working-directory: file_re
           name: wheels-linux-${{ matrix.platform.target }}
           path: dist
       - name: pytest
@@ -56,9 +57,9 @@ jobs:
           set -e
           python3 -m venv .venv
           source .venv/bin/activate
-          pip install file_re --find-links dist --force-reinstall
+          pip install file_re --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
           pip install pytest
-          cd unit_tests
+          cd ${{ github.workspace }}/unit_tests
           pytest
       - name: pytest
         if: ${{ !startsWith(matrix.platform.target, 'x86') && matrix.platform.target != 'ppc64' }}
@@ -73,7 +74,7 @@ jobs:
             pip3 install -U pip pytest
           run: |
             set -e
-            pip3 install file_re --find-links dist --force-reinstall
+            pip3 install file_re --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
             cd unit_tests
             pytest
 
@@ -98,6 +99,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
+          working-directory: file_re
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
           sccache: 'true'
@@ -105,6 +107,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
+          working-directory: file_re
           name: wheels-musllinux-${{ matrix.platform.target }}
           path: dist
       - name: pytest
@@ -156,12 +159,14 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
+          working-directory: file_re
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
+          working-directory: file_re
           name: wheels-windows-${{ matrix.platform.target }}
           path: dist
       - name: pytest
@@ -192,12 +197,14 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
+          working-directory: file_re
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
+          working-directory: file_re
           name: wheels-macos-${{ matrix.platform.target }}
           path: dist
       - name: pytest
@@ -216,10 +223,12 @@ jobs:
       - name: Build sdist
         uses: PyO3/maturin-action@v1
         with:
+          working-directory: file_re
           command: sdist
           args: --out dist
       - name: Upload sdist
         uses: actions/upload-artifact@v4
         with:
+          working-directory: file_re
           name: wheels-sdist
           path: dist
