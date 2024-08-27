@@ -1,5 +1,5 @@
 from ._file_re import search_line_by_line, find_all
-
+from pathlib import Path
 
 class Match:
     def __init__(self, match_str, start, end, matchs_list, matchs_dict):
@@ -53,6 +53,9 @@ class file_re:
 
     @staticmethod
     def search(regex, file_path):
+        if isinstance(file_path, Path):
+            file_path = str(file_path)
+
         result = search_line_by_line(regex, file_path)
 
         match = None
@@ -70,6 +73,9 @@ class file_re:
     
     @staticmethod
     def findall(regex, file_path):
+        if isinstance(file_path, Path):
+            file_path = str(file_path)
+    
         match_list = find_all(regex, file_path)
 
         match = None

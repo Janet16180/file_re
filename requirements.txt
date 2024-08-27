@@ -1,0 +1,6 @@
+-e git+https://github.com/Janet16180/file_re.git@206dfd065635a5484dac8c0ceeff4eda24c455d3#egg=file_re&subdirectory=file_re
+iniconfig==2.0.0
+maturin==1.7.1
+packaging==24.1
+pluggy==1.5.0
+pytest==8.3.2

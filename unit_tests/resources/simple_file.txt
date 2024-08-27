@@ -1,0 +1,42 @@
+Welcome to the file_re library
+This library is used to test regex operations directly on files.
+
+# Sample entries to test various regex patterns
+123-456-7890   # phone number format
+user@example.com  # email address
+user2@example.com # Second occurance
+https://example.com  # URL
+abcd-efgh-ijkl  # generic pattern
+2023-10-05  # date in yyyy-mm-dd format
+2023/10/05  # date in yyyy/mm/dd format
+someMixedCaseLINE
+lowercaseonly
+UPPERCASEONLY
+
+# Test greedy match
+<div>Some content</div><div>Another content</div>
+
+# More complex data to test
+{
+    "name": "John Doe",
+    "age": 30,
+    "email": "john.doe@example.com",
+    "address": {
+        "street": "123 Elm Street",
+        "city": "Gotham",
+        "zipcode": "54321"
+    }
+}
+
+# Names with varying formats
+Dr. Jane Doe
+Mr John Smith
+Mrs. Annabelle Brown
+Ms Clara Oswald
+Prof. George Clark
+
+# Different example texts
+The quick brown fox jumps over the lazy dog.
+Regex can be complex, but it is very powerful.
+Call 1-800-123-4567 for more information.
+
