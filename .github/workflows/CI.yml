@@ -137,8 +137,8 @@ jobs:
             python3 -m virtualenv .venv
             source .venv/bin/activate
             pip install pytest
-            pip install file_re --find-links ${{ github.workspace }}/dist --force-reinstall
-            cd ${{ github.workspace }}/unit_tests
+            pip install file_re --find-links /io/file_re/dist --force-reinstall
+            cd /io/unit_tests
             pytest -v
 
   windows:
@@ -174,9 +174,9 @@ jobs:
         run: |
           python3 -m venv .venv
           source .venv/Scripts/activate
-          pip install file_re --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
+          pip install file_re --find-links .\file_re\dist --force-reinstall
           pip install pytest
-          cd ${{ github.workspace }}/unit_tests
+          cd unit_tests
           pytest -v
 
   macos:
