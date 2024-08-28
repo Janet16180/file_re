@@ -137,8 +137,8 @@ jobs:
             python3 -m virtualenv .venv
             source .venv/bin/activate
             pip install pytest
-            pip install file_re --find-links /io/file_re/dist --force-reinstall
-            cd /io/unit_tests
+            pip install file_re --find-links ./file_re/dist --force-reinstall
+            cd ./unit_tests
             pytest -v
 
   windows:
@@ -167,14 +167,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wheels-windows-${{ matrix.platform.target }}
-          path: ${{ github.workspace }}\file_re\dist
+          path: file_re/dist
       - name: pytest
         if: ${{ !startsWith(matrix.platform.target, 'aarch64') }}
         shell: bash
         run: |
           python3 -m venv .venv
           source .venv/Scripts/activate
-          pip install file_re --find-links .\file_re\dist --force-reinstall
+          pip install file_re --find-links ./file_re/dist --force-reinstall
           pip install pytest
           cd unit_tests
           pytest -v
