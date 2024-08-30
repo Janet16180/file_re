@@ -84,3 +84,58 @@ def test_case_sensitive_match(file_name):
     assert match
     assert match.group(0) == "someMixedCaseLINE"
 
+@pytest.mark.parametrize(
+    "file_name",
+    file_types
+)
+def test_multiline_mode(file_name):
+    simple_file = Path(ROOT, "resources", file_name)
+    match = file_re.search(
+        r"(\d{3})-(\d{3})-(\d{4})",
+        simple_file,
+        multiline=True
+    )
+    assert match
+    assert match.group(0, 1, 2, 3) == ("123-456-7890", "123", "456", "7890")
+
+    match = file_re.search(
+        r"(?P<username>[\w\.-]+)@(?P<domain>[\w]+)\.\w+",
+        simple_file,
+        multiline=True
+    )
+    assert match
+    assert match.group(0, "username", "domain") == ("user@example.com", "user", "example")
+
+    # Try non-greedy match
+    match = file_re.search(
+        r"<.*>",
+        simple_file,
+        multiline=True
+    )
+    assert match
+    assert match.group(0) == "<div>Some content</div><div>Another content</div>"
+
+    # Try greedy match
+    match = file_re.search(
+        r"<.*?>",
+        simple_file,
+        multiline=True
+    )
+    assert match
+    assert match.group(0) == "<div>"
+
+    match = file_re.search(
+        r"somemixedcaseline",
+        simple_file,
+        multiline=True
+    )
+    assert match is None
+
+    # Case-insensitive pattern
+    match = file_re.search(
+        r"(?i)somemixedcaseline",
+        simple_file,
+        multiline=True
+    )
+    assert match
+    assert match.group(0) == "someMixedCaseLINE"

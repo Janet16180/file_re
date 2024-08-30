@@ -1,4 +1,4 @@
-from ._file_re import search_single_line, find_all
+from ._file_re import search_single_line, search_multi_line, findall_single_line, findall_multi_line
 from pathlib import Path
 
 class Match:
@@ -52,11 +52,14 @@ class Match:
 class file_re:
 
     @staticmethod
-    def search(regex, file_path):
+    def search(regex, file_path, multiline=False):
         if isinstance(file_path, Path):
             file_path = str(file_path)
 
-        result = search_single_line(regex, file_path)
+        if multiline:
+            result = search_multi_line(regex, file_path)
+        else:
+            result = search_single_line(regex, file_path)
 
         match = None
         if result:
@@ -72,11 +75,15 @@ class file_re:
         return match
     
     @staticmethod
-    def findall(regex, file_path):
+    def findall(regex, file_path, multiline=False):
         if isinstance(file_path, Path):
             file_path = str(file_path)
     
-        match_list = find_all(regex, file_path)
+
+        if multiline:
+            match_list = findall_multi_line(regex, file_path)
+        else:
+            match_list = findall_single_line(regex, file_path)
 
         match = None
         if match_list:

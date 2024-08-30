@@ -95,7 +95,7 @@ fn search_single_line(regex: &str, file_path: &str) -> PyResult<Option<Match>> {
 }
 
 #[pyfunction]
-fn search_multiline(regex: &str, file_path: &str) -> PyResult<Option<Match>> {
+fn search_multi_line(regex: &str, file_path: &str) -> PyResult<Option<Match>> {
     let re = Regex::new(regex)
         .map_err(|err| PyErr::new::<pyo3::exceptions::PyValueError, _>(err.to_string()))?;
 
@@ -136,8 +136,31 @@ fn search_multiline(regex: &str, file_path: &str) -> PyResult<Option<Match>> {
     Ok(None)
 }
 
+
 #[pyfunction]
-fn find_all(regex: &str, path: &str) -> PyResult<Vec<Vec<String>>> {
+fn findall_single_line(regex: &str, file_path: &str) -> PyResult<Vec<Vec<String>>> {
+    let re = Regex::new(regex)
+        .map_err(|err| PyErr::new::<pyo3::exceptions::PyValueError, _>(err.to_string()))?;
+
+    let reader = read_file::open_file_as_reader(file_path)?;
+    let mut matches: Vec<Vec<String>> = Vec::new();
+
+    for line in reader.lines() {
+        let line = line.unwrap();
+        for caps in re.captures_iter(&line) {
+            let groups: Vec<String> = (0..caps.len())
+                .map(|i| caps.get(i).map_or(String::new(), |m| m.as_str().to_string()))
+                .collect();
+            matches.push(groups);
+        }
+    }
+    
+    Ok(matches)
+
+}
+
+#[pyfunction]
+fn findall_multi_line(regex: &str, path: &str) -> PyResult<Vec<Vec<String>>> {
     let re = Regex::new(regex)
         .map_err(|err| PyErr::new::<pyo3::exceptions::PyValueError, _>(err.to_string()))?;
 
@@ -165,8 +188,9 @@ fn find_all(regex: &str, path: &str) -> PyResult<Vec<Vec<String>>> {
 fn file_re(m: &Bound<'_, PyModule>) -> PyResult<()> {
     
     m.add_function(wrap_pyfunction!(search_single_line, m)?)?;
-    m.add_function(wrap_pyfunction!(search_multiline, m)?)?;
-    m.add_function(wrap_pyfunction!(find_all, m)?)?;
+    m.add_function(wrap_pyfunction!(search_multi_line, m)?)?;
+    m.add_function(wrap_pyfunction!(findall_single_line, m)?)?;
+    m.add_function(wrap_pyfunction!(findall_multi_line, m)?)?;
     m.add_class::<Match>()?;
     Ok(())
 }
