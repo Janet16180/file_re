@@ -6,8 +6,8 @@ use std::io::{BufRead};
 
 #[pyclass]
 struct Match {
-    groups: Vec<Option<String>>,
-    named_groups: HashMap<String, Option<String>>,
+    groups: Vec<String>,
+    named_groups: HashMap<String, String>,
     start: usize,
     end: usize,
     match_str: String,
@@ -17,12 +17,12 @@ struct Match {
 impl Match {
     
     #[getter]
-    fn groups(&self) -> Vec<Option<String>> {
+    fn groups(&self) -> Vec<String> {
         self.groups.clone()
     }
 
     #[getter]
-    fn named_groups(&self) -> HashMap<String, Option<String>> {
+    fn named_groups(&self) -> HashMap<String, String> {
         self.named_groups.clone()
     }
 
@@ -55,7 +55,9 @@ fn search_single_line(regex: &str, file_path: &str) -> PyResult<Option<Match>> {
     for line in reader.lines() {
         let line = line.unwrap();
 
-        if let Some(mat) = re.find(&line) {
+        if let Some(captures) = re.captures(&line) {
+            let mat = captures.get(0).unwrap();
+
             let match_str = mat.as_str().to_string();
 
             let start_byte = mat.start();
@@ -64,34 +66,32 @@ fn search_single_line(regex: &str, file_path: &str) -> PyResult<Option<Match>> {
             let start_char = line[..start_byte].chars().count();
             let end_char = line[..end_byte].chars().count();
 
-            let captures = re.captures(&line).unwrap();
-            let mut named_groups: HashMap<String, Option<String>> = HashMap::new();
+            let mut named_groups: HashMap<String, String> = HashMap::new();
 
-            let groups: Vec<Option<String>> = (1..captures.len())
-                .map(|i| captures.get(i).map(|m| m.as_str().to_string()))
+            let groups: Vec<String> = (1..captures.len())
+                .map(|i| captures.get(i).map_or(String::new(), |m| m.as_str().to_string()))
                 .collect();
 
             for name in re.capture_names().flatten() {
                 if let Some(m) = captures.name(name) {
-                    named_groups.insert(name.to_string(), Some(m.as_str().to_string()));
+                    named_groups.insert(name.to_string(), m.as_str().to_string());
                 } else {
-                    named_groups.insert(name.to_string(), None);
+                    named_groups.insert(name.to_string(), String::new());
                 }
             }
 
             return Ok(Some(Match {
-                groups: groups,
-                named_groups: named_groups,
+                groups,
+                named_groups,
                 start: actual_start + start_char,
                 end: actual_start + end_char,
-                match_str: match_str,
+                match_str,
             }));
         }
         actual_start += line.chars().count() + 1;
     }
 
     Ok(None)
-
 }
 
 #[pyfunction]
@@ -101,7 +101,8 @@ fn search_multiline(regex: &str, file_path: &str) -> PyResult<Option<Match>> {
 
     let file_content = read_file::open_file_full_content(file_path)?;
 
-    if let Some(mat) = re.find(&file_content) {
+    if let Some(captures) = re.captures(&file_content) {
+        let mat = captures.get(0).unwrap();
         let match_str = mat.as_str().to_string();
 
         let start_byte = mat.start();
@@ -110,30 +111,28 @@ fn search_multiline(regex: &str, file_path: &str) -> PyResult<Option<Match>> {
         let start_char = file_content[..start_byte].chars().count();
         let end_char = file_content[..end_byte].chars().count();
 
-        let captures = re.captures(&file_content).unwrap();
-        let mut named_groups: HashMap<String, Option<String>> = HashMap::new();
-
-        let groups: Vec<Option<String>> = (1..captures.len())
-            .map(|i| captures.get(i).map(|m| m.as_str().to_string()))
+        let mut named_groups: HashMap<String, String> = HashMap::new();
+        let groups: Vec<String> = (1..captures.len())
+            .map(|i| captures.get(i).map_or(String::new(), |m| m.as_str().to_string()))
             .collect();
 
         for name in re.capture_names().flatten() {
             if let Some(m) = captures.name(name) {
-                named_groups.insert(name.to_string(), Some(m.as_str().to_string()));
+                named_groups.insert(name.to_string(), m.as_str().to_string());
             } else {
-                named_groups.insert(name.to_string(), None);
+                named_groups.insert(name.to_string(), String::new());
             }
         }
 
         return Ok(Some(Match {
-            groups: groups,
-            named_groups: named_groups,
+            groups,
+            named_groups,
             start: start_char,
             end: end_char,
-            match_str: match_str,
+            match_str,
         }));
-
     }
+
     Ok(None)
 }
 
@@ -167,6 +166,8 @@ fn file_re(m: &Bound<'_, PyModule>) -> PyResult<()> {
     
     m.add_function(wrap_pyfunction!(search_single_line, m)?)?;
     m.add_function(wrap_pyfunction!(search_multiline, m)?)?;
+    m.add_function(wrap_pyfunction!(find_all, m)?)?;
     m.add_class::<Match>()?;
     Ok(())
 }
+

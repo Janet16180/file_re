@@ -1,4 +1,4 @@
-from ._file_re import search_line_by_line, find_all
+from ._file_re import search_single_line, find_all
 from pathlib import Path
 
 class Match:
@@ -56,7 +56,7 @@ class file_re:
         if isinstance(file_path, Path):
             file_path = str(file_path)
 
-        result = search_line_by_line(regex, file_path)
+        result = search_single_line(regex, file_path)
 
         match = None
         if result:

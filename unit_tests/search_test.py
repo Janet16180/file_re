@@ -83,3 +83,4 @@ def test_case_sensitive_match(file_name):
     match = file_re.search(r"(?i)somemixedcaseline", simple_file)
     assert match
     assert match.group(0) == "someMixedCaseLINE"
+
