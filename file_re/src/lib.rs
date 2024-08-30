@@ -44,7 +44,7 @@ impl Match {
 }
 
 #[pyfunction]
-fn search_line_by_line(regex: &str, file_path: &str) -> PyResult<Option<Match>> {
+fn search_single_line(regex: &str, file_path: &str) -> PyResult<Option<Match>> {
     let re = Regex::new(regex)
         .map_err(|err| PyErr::new::<pyo3::exceptions::PyValueError, _>(err.to_string()))?;
 
@@ -95,6 +95,49 @@ fn search_line_by_line(regex: &str, file_path: &str) -> PyResult<Option<Match>> 
 }
 
 #[pyfunction]
+fn search_multiline(regex: &str, file_path: &str) -> PyResult<Option<Match>> {
+    let re = Regex::new(regex)
+        .map_err(|err| PyErr::new::<pyo3::exceptions::PyValueError, _>(err.to_string()))?;
+
+    let file_content = read_file::open_file_full_content(file_path)?;
+
+    if let Some(mat) = re.find(&file_content) {
+        let match_str = mat.as_str().to_string();
+
+        let start_byte = mat.start();
+        let end_byte = mat.end();
+
+        let start_char = file_content[..start_byte].chars().count();
+        let end_char = file_content[..end_byte].chars().count();
+
+        let captures = re.captures(&file_content).unwrap();
+        let mut named_groups: HashMap<String, Option<String>> = HashMap::new();
+
+        let groups: Vec<Option<String>> = (1..captures.len())
+            .map(|i| captures.get(i).map(|m| m.as_str().to_string()))
+            .collect();
+
+        for name in re.capture_names().flatten() {
+            if let Some(m) = captures.name(name) {
+                named_groups.insert(name.to_string(), Some(m.as_str().to_string()));
+            } else {
+                named_groups.insert(name.to_string(), None);
+            }
+        }
+
+        return Ok(Some(Match {
+            groups: groups,
+            named_groups: named_groups,
+            start: start_char,
+            end: end_char,
+            match_str: match_str,
+        }));
+
+    }
+    Ok(None)
+}
+
+#[pyfunction]
 fn find_all(regex: &str, path: &str) -> PyResult<Vec<Vec<String>>> {
     let re = Regex::new(regex)
         .map_err(|err| PyErr::new::<pyo3::exceptions::PyValueError, _>(err.to_string()))?;
@@ -122,8 +165,8 @@ fn find_all(regex: &str, path: &str) -> PyResult<Vec<Vec<String>>> {
 #[pyo3(name="_file_re")]
 fn file_re(m: &Bound<'_, PyModule>) -> PyResult<()> {
     
-    m.add_function(wrap_pyfunction!(search_line_by_line, m)?)?;
-    m.add_function(wrap_pyfunction!(find_all, m)?)?;
+    m.add_function(wrap_pyfunction!(search_single_line, m)?)?;
+    m.add_function(wrap_pyfunction!(search_multiline, m)?)?;
     m.add_class::<Match>()?;
     Ok(())
 }
