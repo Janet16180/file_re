@@ -28,6 +28,10 @@ UPPERCASEONLY
     }
 }
 
+# More email addresses
+user3@example.com # Third occurance
+user4@example.com # Fourth occurance
+
 # Names with varying formats
 Dr. Jane Doe
 Mr John Smith
