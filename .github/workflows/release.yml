@@ -1,11 +1,7 @@
 name: Release
 
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types:
-      - completed
-
+  workflow_dispatch:
 jobs:
   release:
     runs-on: ubuntu-latest
