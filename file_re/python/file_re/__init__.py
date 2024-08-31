@@ -90,8 +90,9 @@ class file_re:
             if len(match_list[0]) == 1:
                 match = [item for sublist in match_list for item in sublist]
             else:
-                match = [tuple(item) for sublist in match_list for item in sublist]
+                match = [tuple(sublist[1:]) for sublist in match_list]
         
         return match
 
 __all__ = [file_re]
+

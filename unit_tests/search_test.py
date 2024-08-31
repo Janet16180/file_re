@@ -1,6 +1,7 @@
 import pytest
 from pathlib import Path
 from file_re import file_re
+import json
 
 ROOT = Path(__file__).parent
 
@@ -9,6 +10,7 @@ file_types = [
     ("simple_file.txt.gz"),
     ("simple_file.txt.xz"),
 ]
+
 
 @pytest.mark.parametrize(
     "file_name",
@@ -32,13 +34,13 @@ def test_search_name_groups_and_number(file_name):
     simple_file = Path(ROOT, "resources", file_name)
     match = file_re.search(r"(?P<username>[\w\.-]+)@(?P<domain>[\w]+)\.\w+", simple_file)
     assert match
-    assert match.group(0) == "user@example.com"
-    assert match.groupdict() == {"username": "user", "domain": "example"}
-    assert match.groups() == ("user", "example")
-    assert match.group("username") == "user"
+    assert match.group(0) == "user1@example.com"
+    assert match.groupdict() == {"username": "user1", "domain": "example"}
+    assert match.groups() == ("user1", "example")
+    assert match.group("username") == "user1"
     assert match.group("domain") == "example"
-    assert match.group(1, "domain") == ("user", "example")
-    assert match.group(1, 2) == ("user", "example")
+    assert match.group(1, "domain") == ("user1", "example")
+    assert match.group(1, 2) == ("user1", "example")
 
 @pytest.mark.parametrize(
     "file_name",
@@ -90,6 +92,32 @@ def test_case_sensitive_match(file_name):
 )
 def test_multiline_mode(file_name):
     simple_file = Path(ROOT, "resources", file_name)
+    json_str = file_re.search(
+        r"\{[^{]+\{[^}]+\}\n\}",
+        simple_file,
+        multiline=False
+    )
+
+    assert json_str is None
+
+    json_str = file_re.search(
+        r"\{[^{]+\{[^}]+\}\n\}",
+        simple_file,
+        multiline=True
+    )
+    
+    assert json_str
+    json_dict = json.loads(json_str.group(0))
+    assert json_dict
+    assert json_dict["address"]["street"] == "123 Elm Street"
+
+@pytest.mark.parametrize(
+    "file_name",
+    file_types
+)
+def test_multiline_mode_functionality(file_name):
+    simple_file = Path(ROOT, "resources", file_name)
+
     match = file_re.search(
         r"(\d{3})-(\d{3})-(\d{4})",
         simple_file,
@@ -104,7 +132,7 @@ def test_multiline_mode(file_name):
         multiline=True
     )
     assert match
-    assert match.group(0, "username", "domain") == ("user@example.com", "user", "example")
+    assert match.group(0, "username", "domain") == ("user1@example.com", "user1", "example")
 
     # Try non-greedy match
     match = file_re.search(
@@ -131,7 +159,7 @@ def test_multiline_mode(file_name):
     )
     assert match is None
 
-    # Case-insensitive pattern
+    # Case-insensitive pattern\{[\s\S]+\}
     match = file_re.search(
         r"(?i)somemixedcaseline",
         simple_file,
