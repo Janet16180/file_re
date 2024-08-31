@@ -3,7 +3,7 @@ This library is used to test regex operations directly on files.
 
 # Sample entries to test various regex patterns
 123-456-7890   # phone number format
-user@example.com  # email address
+user1@example.com  # email address
 user2@example.com # Second occurance
 https://example.com  # URL
 abcd-efgh-ijkl  # generic pattern
@@ -20,11 +20,21 @@ UPPERCASEONLY
 {
     "name": "John Doe",
     "age": 30,
-    "email": "john.doe@example.com",
     "address": {
         "street": "123 Elm Street",
         "city": "Gotham",
         "zipcode": "54321"
+    }
+}
+
+# More complex data to test 2
+{
+    "name": "Jane Smith",
+    "age": 28,
+    "address": {
+        "street": "456 Maple Avenue",
+        "city": "Metropolis",
+        "zipcode": "67890"
     }
 }
 
