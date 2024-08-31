@@ -42,21 +42,22 @@ jobs:
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: wheels-linux-x86_64
-          name: wheels-linux-x86
-          name: wheels-linux-aarch64
-          name: wheels-linux-armv7
-          name: wheels-linux-s390x
-          name: wheels-linux-ppc64le
-          name: wheels-musllinux-x86_64
-          name: wheels-musllinux-x86
-          name: wheels-musllinux-aarch64
-          name: wheels-musllinux-armv7
-          name: wheels-windows-x64
-          name: wheels-windows-x86
-          name: wheels-macos-x86_64
-          name: wheels-macos-aarch64
-          name: wheels-sdist
+          name: |
+            wheels-linux-x86_64
+            wheels-linux-x86
+            wheels-linux-aarch64
+            wheels-linux-armv7
+            wheels-linux-s390x
+            wheels-linux-ppc64le
+            wheels-musllinux-x86_64
+            wheels-musllinux-x86
+            wheels-musllinux-aarch64
+            wheels-musllinux-armv7
+            wheels-windows-x64
+            wheels-windows-x86
+            wheels-macos-x86_64
+            wheels-macos-aarch64
+            wheels-sdist
 
       - name: Publish to PyPI
         uses: PyO3/maturin-action@v1
