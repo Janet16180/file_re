@@ -48,7 +48,7 @@ def test_groups(file_name):
 def test_multiline_mode(file_name):
     simple_file = Path(ROOT, "resources", file_name)
     json_matchs = file_re.findall(
-        r"\{[^{]+\{[^}]+\}\n\}",
+        r"\{[^{]+\{[^}]+\}\r?\n\}",
         simple_file,
         multiline=False
     )
@@ -56,7 +56,7 @@ def test_multiline_mode(file_name):
     assert len(json_matchs) == 0
 
     json_matchs = file_re.findall(
-        r"\{[^{]+\{[^}]+\}\n\}",
+        r"\{[^{]+\{[^}]+\}\r?\n\}",
         simple_file,
         multiline=True
     )

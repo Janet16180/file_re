@@ -93,7 +93,7 @@ def test_case_sensitive_match(file_name):
 def test_multiline_mode(file_name):
     simple_file = Path(ROOT, "resources", file_name)
     json_str = file_re.search(
-        r"\{[^{]+\{[^}]+\}\n\}",
+        r"\{[^{]+\{[^}]+\}\r?\n\}",
         simple_file,
         multiline=False
     )
@@ -101,7 +101,7 @@ def test_multiline_mode(file_name):
     assert json_str is None
 
     json_str = file_re.search(
-        r"\{[^{]+\{[^}]+\}\n\}",
+        r"\{[^{]+\{[^}]+\}\r?\n\}",
         simple_file,
         multiline=True
     )
