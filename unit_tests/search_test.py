@@ -139,3 +139,4 @@ def test_multiline_mode(file_name):
     )
     assert match
     assert match.group(0) == "someMixedCaseLINE"
+
