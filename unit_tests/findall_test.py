@@ -53,7 +53,7 @@ def test_multiline_mode(file_name):
         multiline=False
     )
 
-    assert not json_matchs
+    assert len(json_matchs) == 0
 
     json_matchs = file_re.findall(
         r"\{[^{]+\{[^}]+\}\n\}",
