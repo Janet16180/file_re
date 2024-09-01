@@ -26,14 +26,19 @@ jobs:
           LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "no-tags-found")
           echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
 
-      - name: Check Cargo.toml version
+      - name: Extract version from Cargo.toml
+        id: extract_version
         run: |
-          CARGO_VERSION=$(yq eval '.package.version' file_re/Cargo.toml)
-          if [ "$CARGO_VERSION" != "${{ env.LATEST_TAG }}" ]; then
-            echo "Cargo.toml version ($CARGO_VERSION) does not match the latest tag (${{ env.LATEST_TAG }}), failing the job."
+          CARGO_VERSION=$(grep '^version' file_re/Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+          echo "CARGO_VERSION=$CARGO_VERSION" >> $GITHUB_ENV
+
+      - name: Check version match
+        run: |
+          if [ "${{ env.LATEST_TAG }}" != "${{ env.CARGO_VERSION }}" ]; then
+            echo "Version mismatch: Latest tag (${{ env.LATEST_TAG }}) does not match Cargo.toml version (${{ env.CARGO_VERSION }})."
             exit 1
           fi
-          echo "Cargo.toml version matches the latest tag."
+          echo "Version match: Latest tag (${{ env.LATEST_TAG }}) matches Cargo.toml version (${{ env.CARGO_VERSION }})."
 
       - name: Download Artifacts
         uses: actions/download-artifact@v4
