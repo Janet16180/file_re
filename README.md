@@ -9,40 +9,9 @@
 - **Compressed Files**: Supports reading and searching within `.gz` and `.xz` compressed files.
 - **Flexible**: Similar interface to Python's built-in `re` module.
 
-## 🚧 Under Development
-
-**Note:** This repository is currently under active development and is not yet available on PyPI. Please refrain from using this library in production environments as interfaces and functionalities are subject to change. The library will be uploaded to PyPI once it is ready for public use.
-
-## Installation
-
-### 1. Create a Virtual Environment
-
-Creating a virtual environment helps you manage dependencies and isolate your project from other Python projects on your machine.
-
-```bash
-python -m venv venv
-```
-
-
-### 2. Install Required Dependencies
-```bash
-pip install -r requirements.txt
-```
-
-
-### 3. Install file_re
-```bash
-cd file_re
-maturin develop --release
-```
-
-## To run unit test
-```bash
-cd unit_tests
-python -m pytest -v
-```
 
 ## Usage
+
 ```python
 from file_re import file_re
 from pathlib import Path
@@ -73,6 +42,26 @@ print(matches)
 # You can read direclty from compressed files
 file_path = Path('path/to/your/big_file.txt.gz')
 matches = file_re.findall(r"(\d{3})-(\d{3})-(\d{4})", file_path)
-print(matches)
+
+# For regex that requires multiple lines you have to enable the multiline mode
+matches = file_re.search(r"<body>[\s\S]+</body>", file_path, multiline=True)
+print(matches.group(0))
 ```
 
+## Limitations
+
+1. **Default Line-by-Line Processing**:
+   - **Memory Efficiency**: By default, `file_re` reads files line by line and applies the regular expression to each line individually. This approach is memory efficient as it avoids loading the entire file into RAM.
+   - **Pattern Constraints**: This mode may not work effectively for regex patterns that span across multiple lines. 
+
+2. **Multiline Mode**:
+   - **Full File Loading**: When the multiline mode is enabled, the entire file is loaded into RAM to perform the regex operation. This is necessary for regex patterns that require matching across multiple lines.
+   - **Increased RAM Usage**: Loading large files (in gigabytes) into RAM can lead to significant memory consumption. This may not be suitable for systems with limited memory.
+   - **Performance Trade-offs**: While enabling multiline mode can result in faster `findall` operations for certain patterns, it comes at the cost of higher memory usage.
+
+3. **Limited Flag Support**:
+   - **Flag Limitations**: Currently, flags such as `re.IGNORECASE` or `re.MULTILINE` are not supported.
+   - **Future Enhancements**: Support for these flags is planned for future releases, which will enhance the flexibility and usability of the library.
+
+
+Users are encouraged to assess their specific needs and system capabilities when using `file_re`, especially when working with extremely large files or complex multiline regex patterns.
