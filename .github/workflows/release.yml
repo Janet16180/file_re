@@ -28,14 +28,14 @@ jobs:
 
       - name: Update Cargo.toml version
         run: |
-          yq eval ".package.version = \"${{ env.TAG_VERSION }}\"" -i file_re/Cargo.toml
+          yq eval ".package.version = \"${{ env.LATEST_TAG }}\"" -i file_re/Cargo.toml
 
       - name: Commit updated Cargo.toml
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add file_re/Cargo.toml
-          git commit -m "Bump version to ${{ env.TAG_VERSION }}"
+          git commit -m "Bump version to ${{ env.LATEST_TAG }}"
           git push
 
       - name: Download Artifacts
