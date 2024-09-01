@@ -188,13 +188,12 @@ class file_re:
         else:
             match_list = findall_single_line(regex, file_path)
 
-        match = None
         if match_list:
             if len(match_list[0]) == 1:
-                match = [item for sublist in match_list for item in sublist]
+                match_list = [item for sublist in match_list for item in sublist]
             else:
-                match = [tuple(item) for sublist in match_list for item in sublist]
+                match_list = [tuple(sublist[1:]) for sublist in match_list]
         
-        return match
+        return match_list
 
 __all__ = [file_re]
