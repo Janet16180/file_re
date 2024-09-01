@@ -230,3 +230,39 @@ jobs:
         with:
           name: wheels-sdist
           path: ${{ github.workspace }}/file_re/dist
+
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    if: "startsWith(github.ref, 'refs/tags/')"
+    needs: [linux, musllinux, windows, macos, sdist]
+    steps:
+      - name: Parse tag version
+        id: get_version
+        run: |
+          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "no-tags-found")
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+
+      - name: Extract version from Cargo.toml
+        id: extract_version
+        run: |
+          CARGO_VERSION=$(grep '^version' file_re/Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+          echo "CARGO_VERSION=$CARGO_VERSION" >> $GITHUB_ENV
+
+      - name: Check version match
+        run: |
+          if [ "${{ env.LATEST_TAG }}" != "${{ env.CARGO_VERSION }}" ]; then
+            echo "Version mismatch: Latest tag (${{ env.LATEST_TAG }}) does not match Cargo.toml version (${{ env.CARGO_VERSION }})."
+            exit 1
+          fi
+          echo "Version match: Latest tag (${{ env.LATEST_TAG }}) matches Cargo.toml version (${{ env.CARGO_VERSION }})."
+
+      - uses: actions/download-artifact@v4
+      - name: Publish to PyPI
+        uses: PyO3/maturin-action@v1
+        env:
+          MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        with:
+          command: upload
+          args: --non-interactive --skip-existing wheels-*/*
