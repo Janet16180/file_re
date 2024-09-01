@@ -26,17 +26,14 @@ jobs:
           LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "no-tags-found")
           echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
 
-      - name: Update Cargo.toml version
+      - name: Check Cargo.toml version
         run: |
-          yq eval ".package.version = \"${{ env.LATEST_TAG }}\"" -i file_re/Cargo.toml
-
-      - name: Commit updated Cargo.toml
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git add file_re/Cargo.toml
-          git commit -m "Bump version to ${{ env.LATEST_TAG }}"
-          git push
+          CARGO_VERSION=$(yq eval '.package.version' file_re/Cargo.toml)
+          if [ "$CARGO_VERSION" != "${{ env.LATEST_TAG }}" ]; then
+            echo "Cargo.toml version ($CARGO_VERSION) does not match the latest tag (${{ env.LATEST_TAG }}), failing the job."
+            exit 1
+          fi
+          echo "Cargo.toml version matches the latest tag."
 
       - name: Download Artifacts
         uses: actions/download-artifact@v4
