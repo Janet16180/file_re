@@ -6,4 +6,4 @@ search = file_re_cls.search
 findall = file_re_cls.findall
 
 
-__all__ = ['search', 'findall', 'Match']
+__all__ = ["search", "findall", "Match"]

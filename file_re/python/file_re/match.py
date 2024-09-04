@@ -1,5 +1,12 @@
 class Match:
-    def __init__(self, match_str, start, end, matchs_list, matchs_dict):
+    def __init__(
+        self,
+        match_str: str,
+        start: int,
+        end: int,
+        matchs_list: list[str],
+        matchs_dict: dict[str, str],
+    ):
         """
         Initializes a Match object.
 
@@ -17,7 +24,6 @@ class Match:
         self.__matchs_list = matchs_list
         self.__matchs_dict = matchs_dict
 
-
     def span(self):
         """
         Returns the span (start, end) of the match.
@@ -26,7 +32,7 @@ class Match:
             tuple: A tuple containing the start and end positions.
         """
         return self.__span
-    
+
     def start(self):
         """
         Returns the start position of the match.
@@ -35,7 +41,7 @@ class Match:
             int: The start position of the match.
         """
         return self.__start
-    
+
     def end(self):
         """
         Returns the end position of the match.
@@ -44,7 +50,7 @@ class Match:
             int: The end position of the match.
         """
         return self.__end
-    
+
     def group(self, *args):
         """
         Returns one or more subgroups of the match.
@@ -65,15 +71,15 @@ class Match:
                 if arg == 0:
                     result_groups.append(self.__match_str)
                 else:
-                    result_groups.append(self.__matchs_list[arg-1])
+                    result_groups.append(self.__matchs_list[arg - 1])
             elif isinstance(arg, str):
                 result_groups.append(self.__matchs_dict[arg])
-    
+
         if len(result_groups) == 1:
             return result_groups[0]
-        
+
         return tuple(result_groups)
-    
+
     def groups(self):
         """
         Returns a tuple containing all the matched subgroups.
@@ -82,7 +88,7 @@ class Match:
             tuple: A tuple containing all the matched subgroups.
         """
         return tuple(self.__matchs_list)
-    
+
     def groupdict(self):
         """
         Returns a dictionary containing all the named matched subgroups.
@@ -91,7 +97,7 @@ class Match:
             dict: A dictionary containing all the named matched subgroups.
         """
         return self.__matchs_dict
-    
+
     def __str__(self):
         """
         Returns a string representation of the Match object.
@@ -100,7 +106,7 @@ class Match:
             str: A string representation of the Match object.
         """
         return f"<file_re.Match object; span={self.__span}, match='{self.__match_str}'>"
-    
+
     def __repr__(self):
         """
         Returns a string representation of the Match object.
@@ -109,4 +115,3 @@ class Match:
             str: A string representation of the Match object.
         """
         return f"<file_re.Match object; span={self.__span}, match='{self.__match_str}'>"
-                
