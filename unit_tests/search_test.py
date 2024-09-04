@@ -2,6 +2,8 @@ import pytest
 from pathlib import Path
 import file_re
 import json
+from utils import read_file
+import re
 
 ROOT = Path(__file__).parent
 
@@ -167,4 +169,48 @@ def test_multiline_mode_functionality(file_name):
     )
     assert match
     assert match.group(0) == "someMixedCaseLINE"
+
+@pytest.mark.parametrize(
+    "file_name",
+    file_types
+)
+def test_check_span(file_name):
+    simple_file = Path(ROOT, "resources", file_name)
+
+    match_file_re = file_re.search(
+        r"Regex can be complex, but it is very powerful",
+        simple_file,
+        multiline=False
+    )
+
+    span_file_re = match_file_re.span()
+
+    # Check if the span is correct
+    file_str = read_file(simple_file)
+    match = re.search(
+        r"Regex can be complex, but it is very powerful",
+        file_str,
+    )
+    span_re = match.span()
+
+    assert span_file_re == span_re
+
+    # In multiline mode
+    match_file_re = file_re.search(
+        r"\{[^{]+\{[^}]+\}\r?\n\}",
+        simple_file,
+        multiline=True
+    )
+
+    span_file_re = match_file_re.span()
+
+    # Check if the span is correct
+    file_str = read_file(simple_file)
+    match = re.search(
+        r"\{[^{]+\{[^}]+\}\r?\n\}",
+        file_str,
+    )
+    span_re = match.span()
+
+    assert span_file_re == span_re
 
