@@ -34,9 +34,7 @@ class file_re_cls:
         if isinstance(file_path, Path):
             file_path = str(file_path)
 
-        if multiline == 1:
-            result = _search_single_line(regex, file_path)
-        elif multiline == -1:
+        if multiline is True:
             result = _search_multi_line(regex, file_path)
         else:
             result = _search_single_line(regex, file_path)
