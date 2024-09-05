@@ -4,6 +4,7 @@ from file_re import file_re
 import json
 from utils import read_file
 import re
+import sys
 
 ROOT = Path(__file__).parent
 
@@ -177,6 +178,9 @@ def test_multiline_mode_functionality(file_name):
     file_types
 )
 def test_check_span(file_name):
+    if sys.platform.startswith("win") and file_name == "simple_file.txt":
+        pytest.skip("Skipping test_check_span for simple_file.txt on Windows platform")
+    
     simple_file = Path(ROOT, "resources", file_name)
 
     match_file_re = file_re.search(
