@@ -27,7 +27,7 @@ fn read_txt(path: &str) -> io::Result<String> {
 
     #[cfg(windows)]
     {
-        content = content.replace("\r\n", "\n");
+        content = content.replace("\r", "");
     }
     
     Ok(content)
