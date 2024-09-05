@@ -44,7 +44,7 @@ impl Match {
 }
 
 #[pyfunction]
-fn search_single_line(regex: &str, file_path: &str) -> PyResult<Option<Match>> {
+fn _search_single_line(regex: &str, file_path: &str) -> PyResult<Option<Match>> {
     let re = Regex::new(regex)
         .map_err(|err| PyErr::new::<pyo3::exceptions::PyValueError, _>(err.to_string()))?;
 
@@ -95,7 +95,7 @@ fn search_single_line(regex: &str, file_path: &str) -> PyResult<Option<Match>> {
 }
 
 #[pyfunction]
-fn search_multi_line(regex: &str, file_path: &str) -> PyResult<Option<Match>> {
+fn _search_multi_line(regex: &str, file_path: &str) -> PyResult<Option<Match>> {
     let re = Regex::new(regex)
         .map_err(|err| PyErr::new::<pyo3::exceptions::PyValueError, _>(err.to_string()))?;
 
@@ -138,7 +138,7 @@ fn search_multi_line(regex: &str, file_path: &str) -> PyResult<Option<Match>> {
 
 
 #[pyfunction]
-fn findall_single_line(regex: &str, file_path: &str) -> PyResult<Vec<Vec<String>>> {
+fn _findall_single_line(regex: &str, file_path: &str) -> PyResult<Vec<Vec<String>>> {
     let re = Regex::new(regex)
         .map_err(|err| PyErr::new::<pyo3::exceptions::PyValueError, _>(err.to_string()))?;
 
@@ -160,7 +160,7 @@ fn findall_single_line(regex: &str, file_path: &str) -> PyResult<Vec<Vec<String>
 }
 
 #[pyfunction]
-fn findall_multi_line(regex: &str, path: &str) -> PyResult<Vec<Vec<String>>> {
+fn _findall_multi_line(regex: &str, path: &str) -> PyResult<Vec<Vec<String>>> {
     let re = Regex::new(regex)
         .map_err(|err| PyErr::new::<pyo3::exceptions::PyValueError, _>(err.to_string()))?;
 
@@ -187,10 +187,10 @@ fn findall_multi_line(regex: &str, path: &str) -> PyResult<Vec<Vec<String>>> {
 #[pyo3(name="_file_re")]
 fn file_re(m: &Bound<'_, PyModule>) -> PyResult<()> {
     
-    m.add_function(wrap_pyfunction!(search_single_line, m)?)?;
-    m.add_function(wrap_pyfunction!(search_multi_line, m)?)?;
-    m.add_function(wrap_pyfunction!(findall_single_line, m)?)?;
-    m.add_function(wrap_pyfunction!(findall_multi_line, m)?)?;
+    m.add_function(wrap_pyfunction!(_search_single_line, m)?)?;
+    m.add_function(wrap_pyfunction!(_search_multi_line, m)?)?;
+    m.add_function(wrap_pyfunction!(_findall_single_line, m)?)?;
+    m.add_function(wrap_pyfunction!(_findall_multi_line, m)?)?;
     m.add_class::<Match>()?;
     Ok(())
 }

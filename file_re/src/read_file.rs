@@ -24,6 +24,12 @@ fn read_txt(path: &str) -> io::Result<String> {
     let mut file = File::open(path)?;
     let mut content = String::new();
     file.read_to_string(&mut content)?;
+
+    #[cfg(target_os = "windows")]
+    {
+        content = content.replace("\r\n", "\n");
+    }
+    
     Ok(content)
 }
 
