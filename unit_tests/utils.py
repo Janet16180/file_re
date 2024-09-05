@@ -16,7 +16,7 @@ def read_file(path):
         with lzma.open(path, 'rt', newline=None) as f:
             return f.read()
     elif extension == '.txt':
-        with open(path, 'r', newline=None) as f:
+        with open(path, 'r') as f:
             return f.read()
     else:
         raise ValueError(f"Unsupported file extension: {extension}")
