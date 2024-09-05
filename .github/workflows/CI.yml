@@ -213,7 +213,7 @@ jobs:
           pip install file_re --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
           pip install pytest
           cd ${{ github.workspace }}/unit_tests
-          pytest -vs
+          pytest -v
 
   sdist:
     runs-on: ubuntu-latest

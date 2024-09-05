@@ -20,7 +20,6 @@ file_types = [
     file_types
 )
 def test_search_groups_number(file_name):
-    print(dir(file_re))
     simple_file = Path(ROOT, "resources", file_name)
     match = file_re.search(r"(\d{3})-(\d{3})-(\d{4})", simple_file)
     assert match
