@@ -171,6 +171,7 @@ def test_multiline_mode_functionality(file_name):
     assert match
     assert match.group(0) == "someMixedCaseLINE"
 
+
 @pytest.mark.parametrize(
     "file_name",
     file_types
