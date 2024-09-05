@@ -10,13 +10,13 @@ def read_file(path):
 
     extension = path.suffix
     if extension == '.gz':
-        with gzip.open(path, 'rt') as f:
+        with gzip.open(path, 'rt', newline=None) as f:
             return f.read()
     elif extension == '.xz':
-        with lzma.open(path, 'rt') as f:
+        with lzma.open(path, 'rt', newline=None) as f:
             return f.read()
     elif extension == '.txt':
-        with open(path, 'rt') as f:
+        with open(path, 'rt', newline=None) as f:
             return f.read()
     else:
         raise ValueError(f"Unsupported file extension: {extension}")
