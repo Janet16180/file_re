@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-import file_re
+from file_re import file_re
 import json
 
 ROOT = Path(__file__).parent

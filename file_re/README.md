@@ -13,7 +13,7 @@
 ## Usage
 
 ```python
-import file_re
+from file_re import file_re
 from pathlib import Path
 
 # Define the path to the file

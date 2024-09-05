@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-import file_re
+from file_re import file_re
 import json
 from utils import read_file
 import re
