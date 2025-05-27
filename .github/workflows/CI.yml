@@ -44,6 +44,8 @@ jobs:
           args: --release --out dist --find-interpreter
           sccache: 'true'
           manylinux: auto
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -54,10 +56,9 @@ jobs:
         shell: bash
         run: |
           set -e
-          python3 -m venv .venv
+          uv sync
           source .venv/bin/activate
-          python -m pip install -r pyproject.toml
-          pip install file_re --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
+          uv pip install file_re --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
           cd ${{ github.workspace }}/unit_tests
           pytest -v
       - name: pytest
