@@ -57,8 +57,8 @@ jobs:
           python3 -m venv .venv
           source .venv/bin/activate
           pip install file_re --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
-          pip install pytest
           cd ${{ github.workspace }}/unit_tests
+          pip install pytest
           pytest -v
       - name: pytest
         if: ${{ !startsWith(matrix.platform.target, 'x86') && matrix.platform.target != 'ppc64' }}
