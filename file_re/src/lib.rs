@@ -194,16 +194,21 @@ fn _search_with_num_lines(regex: &str, file_path: &str, num_lines: usize) -> PyR
     let reader = read_file::open_file_as_reader(file_path)?;
     
     let mut line_queue: VecDeque<String> = VecDeque::new();
-    let mut current_file_offset = 0;
+    let mut all_lines: Vec<String> = Vec::new();
     let mut last_match: Option<Match> = None;
 
+    // First, collect all lines to handle offset calculation correctly
     for line in reader.lines() {
         let line = line.unwrap();
-        line_queue.push_back(line.clone());
+        all_lines.push(line);
+    }
+
+    // Now process with sliding window
+    for i in 0..all_lines.len() {
+        line_queue.push_back(all_lines[i].clone());
         
         if line_queue.len() > num_lines {
-            let removed_line = line_queue.pop_front().unwrap();
-            current_file_offset += removed_line.chars().count() + 1; // +1 for newline
+            line_queue.pop_front();
         }
 
         let combined_text = line_queue.iter()
@@ -211,9 +216,18 @@ fn _search_with_num_lines(regex: &str, file_path: &str, num_lines: usize) -> PyR
             .collect::<Vec<&str>>()
             .join("\n");
 
-        if let Some(captures) = re.captures(&combined_text) {
+        // Find the LAST match in this window, not the first
+        let mut window_matches: Vec<_> = re.captures_iter(&combined_text).collect();
+        if let Some(captures) = window_matches.pop() {  // Get the last match
             let mat = captures.get(0).unwrap();
             let match_str = mat.as_str().to_string();
+            
+            // Calculate the start of the current window in the file
+            let window_start_line = if i + 1 >= num_lines { i + 1 - num_lines } else { 0 };
+            let mut file_offset = 0;
+            for j in 0..window_start_line {
+                file_offset += all_lines[j].chars().count() + 1; // +1 for newline
+            }
             
             let start_byte = mat.start();
             let end_byte = mat.end();
@@ -237,8 +251,8 @@ fn _search_with_num_lines(regex: &str, file_path: &str, num_lines: usize) -> PyR
             last_match = Some(Match {
                 groups,
                 named_groups,
-                start: current_file_offset + start_char,
-                end: current_file_offset + end_char,
+                start: file_offset + start_char,
+                end: file_offset + end_char,
                 match_str,
             });
         }
