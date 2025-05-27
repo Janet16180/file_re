@@ -13,9 +13,6 @@ on:
 permissions:
   contents: read
 
-env:
-  PYO3_USE_ABI3_FORWARD_COMPATIBILITY: 1
-
 jobs:
   linux:
     runs-on: ${{ matrix.platform.runner }}
@@ -59,8 +56,8 @@ jobs:
           set -e
           python3 -m venv .venv
           source .venv/bin/activate
+          python -m pip install -r pyproject.toml
           pip install file_re --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
-          pip install pytest
           cd ${{ github.workspace }}/unit_tests
           pytest -v
       - name: pytest
