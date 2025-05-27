@@ -18,6 +18,7 @@ jobs:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
+        python-version: ['3.8', '3.9', '3.10']
         platform:
           - runner: ubuntu-latest
             target: x86_64
@@ -35,7 +36,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: ${{ matrix.python-version }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -81,6 +82,7 @@ jobs:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
+        python-version: ['3.8', '3.9', '3.10']
         platform:
           - runner: ubuntu-latest
             target: x86_64
@@ -94,7 +96,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: ${{ matrix.python-version }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -145,6 +147,7 @@ jobs:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
+        python-version: ['3.8', '3.9', '3.10']
         platform:
           - runner: windows-latest
             target: x64
@@ -154,7 +157,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: ${{ matrix.python-version }}
           architecture: ${{ matrix.platform.target }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -183,6 +186,7 @@ jobs:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
+        python-version: ['3.8', '3.9', '3.10']
         platform:
           - runner: macos-12
             target: x86_64
@@ -192,7 +196,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: ${{ matrix.python-version }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -230,7 +234,6 @@ jobs:
         with:
           name: wheels-sdist
           path: ${{ github.workspace }}/file_re/dist
-
 
   release:
     name: Release
