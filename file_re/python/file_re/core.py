@@ -5,6 +5,8 @@ from ._file_re import (
     _search_multi_line,
     _findall_single_line,
     _findall_multi_line,
+    _search_with_num_lines,
+    _findall_with_num_lines,
 )
 from .match import Match
 
@@ -13,7 +15,7 @@ class file_re_cls:
 
     @staticmethod
     def search(
-        regex: str, file_path: Union[str, Path], multiline: bool = False
+        regex: str, file_path: Union[str, Path], multiline: bool = False, num_lines: int = None
     ) -> Match:
         """
         Search the first occurrence of the regex in the file.
@@ -26,6 +28,9 @@ class file_re_cls:
                 to its content.
             multiline (bool, optional): If True, allows the regex to match across
                 multiple lines. Defaults to False.
+            num_lines (int, optional): Maximum number of lines the regex can span.
+                When specified, uses a FIFO queue approach to find the last/longest match
+                within the line limit. If None, uses standard multiline behavior.
 
         Returns:
             Match: A Match object containing information about the match, or None if
@@ -34,7 +39,9 @@ class file_re_cls:
         if isinstance(file_path, Path):
             file_path = str(file_path)
 
-        if multiline is True:
+        if num_lines is not None:
+            result = _search_with_num_lines(regex, file_path, num_lines)
+        elif multiline is True:
             result = _search_multi_line(regex, file_path)
         else:
             result = _search_single_line(regex, file_path)
@@ -54,7 +61,7 @@ class file_re_cls:
 
     @staticmethod
     def findall(
-        regex: str, file_path: Union[str, Path], multiline: bool = False
+        regex: str, file_path: Union[str, Path], multiline: bool = False, num_lines: int = None
     ) -> List:
         """
         Find all occurrences of the regex in the file.
@@ -66,6 +73,9 @@ class file_re_cls:
                 a Path object. The file will be read and the regex applied to its content.
             multiline (bool, optional): If True, allows the regex to match across
                 multiple lines. Defaults to False.
+            num_lines (int, optional): Maximum number of lines the regex can span.
+                When specified, uses a FIFO queue approach to find all matches
+                within the line limit. If None, uses standard multiline behavior.
 
         Returns:
             list: A list of tuples containing all matches found. If there are multiple
@@ -75,7 +85,9 @@ class file_re_cls:
         if isinstance(file_path, Path):
             file_path = str(file_path)
 
-        if multiline:
+        if num_lines is not None:
+            match_list = _findall_with_num_lines(regex, file_path, num_lines)
+        elif multiline:
             match_list = _findall_multi_line(regex, file_path)
         else:
             match_list = _findall_single_line(regex, file_path)

@@ -1,0 +1,7 @@
+start
+middle line 1
+middle line 2
+end
+start
+middle line 3
+end
