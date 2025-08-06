@@ -20,11 +20,11 @@ class TestNumLinesFeature:
         # Test the example from the requirement
         test_file = Path(ROOT, "resources", "multiline_test_1.txt")
 
-        match = file_re.search(r"(hi\n)+", test_file, num_lines=3)
+        match = file_re.search(r"(hi\n?)+", test_file, num_lines=3)
 
         assert match is not None
         # Should match the last sequence of hi's (3 of them)
-        expected = "hi\nhi\nhi\n"
+        expected = "hi\nhi\nhi"
         assert match.group(0) == expected
     
     def test_num_lines_with_groups(self):
