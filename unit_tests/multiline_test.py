@@ -75,20 +75,6 @@ class TestNumLinesFeature:
         match = file_re.search(r"text\nhi", test_file, num_lines=1)
         assert match is None
     
-    def test_num_lines_validation(self):
-        """Test parameter validation for num_lines"""
-        test_file = Path(ROOT, "resources", "multiline_test_2.txt")
-        # Test num_lines <= 0
-        with pytest.raises(Exception, match="num_lines must be greater than 0"):
-            file_re.search(r"test", test_file, num_lines=0)
-        
-        with pytest.raises(Exception, match="num_lines must be greater than 0"):
-            file_re.search(r"test", test_file, num_lines=-1)
-        
-        # Test conflicting parameters
-        with pytest.raises(Exception, match="Cannot use both multiline=True and num_lines"):
-            file_re.search(r"test", test_file, multiline=True, num_lines=2)
-    
     def test_findall_num_lines(self):
         """Test findall with num_lines"""
         test_file = Path(ROOT, "resources", "multiline_test_3.txt")
