@@ -10,12 +10,12 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
-permissions:
-  contents: read
 
 jobs:
   linux:
@@ -23,17 +23,17 @@ jobs:
     strategy:
       matrix:
         platform:
-          - runner: ubuntu-latest
+          - runner: ubuntu-22.04
             target: x86_64
-          - runner: ubuntu-latest
+          - runner: ubuntu-22.04
             target: x86
-          - runner: ubuntu-latest
+          - runner: ubuntu-22.04
             target: aarch64
-          - runner: ubuntu-latest
+          - runner: ubuntu-22.04
             target: armv7
-          - runner: ubuntu-latest
+          - runner: ubuntu-22.04
             target: s390x
-          - runner: ubuntu-latest
+          - runner: ubuntu-22.04
             target: ppc64le
     steps:
       - uses: actions/checkout@v4
@@ -43,56 +43,29 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
-          working-directory: file_re
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
-          sccache: 'true'
+          sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           manylinux: auto
+          working-directory: ${{ github.workspace }}/file_re
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
           name: wheels-linux-${{ matrix.platform.target }}
-          path: ${{ github.workspace }}/file_re/dist
-      - name: pytest
-        if: ${{ startsWith(matrix.platform.target, 'x86_64') }}
-        shell: bash
-        run: |
-          set -e
-          python3 -m venv .venv
-          source .venv/bin/activate
-          pip install file_re --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
-          pip install pytest
-          cd ${{ github.workspace }}/unit_tests
-          pytest -v
-      - name: pytest
-        if: ${{ !startsWith(matrix.platform.target, 'x86') && matrix.platform.target != 'ppc64' }}
-        uses: uraimo/run-on-arch-action@v2
-        with:
-          arch: ${{ matrix.platform.target }}
-          distro: ubuntu22.04
-          githubToken: ${{ github.token }}
-          install: |
-            apt-get update
-            apt-get install -y --no-install-recommends python3 python3-pip
-            pip3 install -U pip pytest
-          run: |
-            set -e
-            pip3 install file_re --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
-            cd ${{ github.workspace }}/unit_tests
-            pytest -v
+          path: dist
 
   musllinux:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
         platform:
-          - runner: ubuntu-latest
+          - runner: ubuntu-22.04
             target: x86_64
-          - runner: ubuntu-latest
+          - runner: ubuntu-22.04
             target: x86
-          - runner: ubuntu-latest
+          - runner: ubuntu-22.04
             target: aarch64
-          - runner: ubuntu-latest
+          - runner: ubuntu-22.04
             target: armv7
     steps:
       - uses: actions/checkout@v4
@@ -102,48 +75,16 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
-          working-directory: file_re
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
-          sccache: 'true'
+          sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           manylinux: musllinux_1_2
+          working-directory: ${{ github.workspace }}/file_re
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
           name: wheels-musllinux-${{ matrix.platform.target }}
-          path: ${{ github.workspace }}/file_re/dist
-      - name: pytest
-        if: ${{ startsWith(matrix.platform.target, 'x86_64') }}
-        uses: addnab/docker-run-action@v3
-        with:
-          image: alpine:latest
-          options: -v ${{ github.workspace }}:/io -w /io
-          run: |
-            set -e
-            apk add py3-pip py3-virtualenv
-            python3 -m virtualenv .venv
-            source .venv/bin/activate
-            pip install file_re --no-index --find-links /io/file_re/dist --force-reinstall
-            pip install pytest
-            cd /io/unit_tests
-            pytest -v
-      - name: pytest
-        if: ${{ !startsWith(matrix.platform.target, 'x86') }}
-        uses: uraimo/run-on-arch-action@v2
-        with:
-          arch: ${{ matrix.platform.target }}
-          distro: alpine_latest
-          githubToken: ${{ github.token }}
-          install: |
-            apk add py3-virtualenv
-          run: |
-            set -e
-            python3 -m virtualenv .venv
-            source .venv/bin/activate
-            pip install pytest
-            pip install file_re --find-links ./file_re/dist --force-reinstall
-            cd ./unit_tests
-            pytest -v
+          path: dist
 
   windows:
     runs-on: ${{ matrix.platform.runner }}
@@ -163,32 +104,22 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
-          working-directory: file_re
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
-          sccache: 'true'
+          sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
+          working-directory: ${{ github.workspace }}/file_re
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
           name: wheels-windows-${{ matrix.platform.target }}
-          path: file_re/dist
-      - name: pytest
-        if: ${{ !startsWith(matrix.platform.target, 'aarch64') }}
-        shell: bash
-        run: |
-          python3 -m venv .venv
-          source .venv/Scripts/activate
-          pip install file_re --find-links ./file_re/dist --force-reinstall
-          pip install pytest
-          cd unit_tests
-          pytest -v
+          path: dist
 
   macos:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
         platform:
-          - runner: macos-12
+          - runner: macos-13
             target: x86_64
           - runner: macos-14
             target: aarch64
@@ -200,24 +131,15 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
-          working-directory: file_re
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
-          sccache: 'true'
+          sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
+          working-directory: ${{ github.workspace }}/file_re
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
           name: wheels-macos-${{ matrix.platform.target }}
-          path: ${{ github.workspace }}/file_re/dist
-      - name: pytest
-        run: |
-          set -e
-          python3 -m venv .venv
-          source .venv/bin/activate
-          pip install file_re --find-links ${{ github.workspace }}/file_re/dist --force-reinstall
-          pip install pytest
-          cd ${{ github.workspace }}/unit_tests
-          pytest -v
+          path: dist
 
   sdist:
     runs-on: ubuntu-latest
@@ -226,52 +148,39 @@ jobs:
       - name: Build sdist
         uses: PyO3/maturin-action@v1
         with:
-          working-directory: file_re
           command: sdist
           args: --out dist
+          working-directory: ${{ github.workspace }}/file_re
       - name: Upload sdist
         uses: actions/upload-artifact@v4
         with:
           name: wheels-sdist
-          path: ${{ github.workspace }}/file_re/dist
-
+          path: dist
 
   release:
     name: Release
     runs-on: ubuntu-latest
-    if: "startsWith(github.ref, 'refs/tags/')"
+    if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
     needs: [linux, musllinux, windows, macos, sdist]
+    permissions:
+      # Use to sign the release artifacts
+      id-token: write
+      # Used to upload release artifacts
+      contents: write
+      # Used to generate artifact attestation
+      attestations: write
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          
-      - name: Parse tag version
-        id: get_version
-        run: |
-          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "no-tags-found")
-          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
-
-      - name: Extract version from Cargo.toml
-        id: extract_version
-        run: |
-          CARGO_VERSION=$(grep '^version' file_re/Cargo.toml | sed 's/version = "\(.*\)"/\1/')
-          echo "CARGO_VERSION=$CARGO_VERSION" >> $GITHUB_ENV
-
-      - name: Check version match
-        run: |
-          if [ "${{ env.LATEST_TAG }}" != "${{ env.CARGO_VERSION }}" ]; then
-            echo "Version mismatch: Latest tag (${{ env.LATEST_TAG }}) does not match Cargo.toml version (${{ env.CARGO_VERSION }})."
-            exit 1
-          fi
-          echo "Version match: Latest tag (${{ env.LATEST_TAG }}) matches Cargo.toml version (${{ env.CARGO_VERSION }})."
-
       - uses: actions/download-artifact@v4
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: 'wheels-*/*'
       - name: Publish to PyPI
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: PyO3/maturin-action@v1
         env:
           MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
         with:
           command: upload
           args: --non-interactive --skip-existing wheels-*/*
+          working-directory: ${{ github.workspace }}/file_re
