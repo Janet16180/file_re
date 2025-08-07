@@ -136,12 +136,13 @@ fn _search_multi_line(regex: &str, file_path: &str) -> PyResult<Option<Match>> {
 }
 
 #[pyfunction]
-fn _search_num_lines(regex: &str, file_path: &str, num_lines: usize) -> PyResult<Option<Match>> {
-    if num_lines == 0 {
+fn _search_num_lines(regex: &str, file_path: &str, num_lines: i32) -> PyResult<Option<Match>> {
+    if num_lines <= 0 {
         return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
             "num_lines must be greater than 0"
         ));
     }
+    let num_lines = num_lines as usize;
 
     let re = Regex::new(regex)
         .map_err(|err| PyErr::new::<pyo3::exceptions::PyValueError, _>(err.to_string()))?;
@@ -347,12 +348,13 @@ fn _findall_multi_line(regex: &str, path: &str) -> PyResult<Vec<Vec<String>>> {
 }
 
 #[pyfunction]
-fn _findall_num_lines(regex: &str, file_path: &str, num_lines: usize) -> PyResult<Vec<Vec<String>>> {
-    if num_lines == 0 {
+fn _findall_num_lines(regex: &str, file_path: &str, num_lines: i32) -> PyResult<Vec<Vec<String>>> {
+    if num_lines <= 0 {
         return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
             "num_lines must be greater than 0"
         ));
     }
+    let num_lines = num_lines as usize;
 
     let re = Regex::new(regex)
         .map_err(|err| PyErr::new::<pyo3::exceptions::PyValueError, _>(err.to_string()))?;
