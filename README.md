@@ -116,7 +116,7 @@ The `num_lines` feature implements a sliding window algorithm:
 
 1. **Buffer Management**: Maintains a FIFO buffer of exactly `num_lines` lines
 2. **Pattern Matching**: Applies regex to the current buffer content on each line read
-3. **Longest Match**: When a match is found, continues reading `num_lines - 1` additional lines to find the longest possible match
+3. **Longest Match**: When a match is found, continues reading `num_lines` additional lines to find the longest possible match
 4. **Memory Efficiency**: Never loads more than `num_lines` into memory at once
 
 ### Example Behavior
@@ -132,11 +132,11 @@ hi
 hi
 ```
 
-And regex `r"(hi\n)+"` with `num_lines=3`:
+And regex `r"(hi\n?)+"` with `num_lines=3`:
 
 1. When first "hi" is encountered, a match is found
-2. Algorithm continues for 2 more lines (num_lines - 1)
-3. Returns the longest match: `"hi\nhi\nhi\n"`
+2. Algorithm continues for 2 more lines (num_lines)
+3. Returns the longest match: `"hi\nhi\nhi"`
 
 ## Limitations
 

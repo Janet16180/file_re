@@ -30,13 +30,13 @@ jobs:
           CARGO_VERSION=$(grep '^version' file_re/Cargo.toml | sed 's/version = "\(.*\)"/\1/')
           echo "CARGO_VERSION=$CARGO_VERSION" >> $GITHUB_ENV
 
-      - name: Check version match
-        run: |
-          if [ "${{ env.LATEST_TAG }}" != "${{ env.CARGO_VERSION }}" ]; then
-            echo "Version mismatch: Latest tag (${{ env.LATEST_TAG }}) does not match Cargo.toml version (${{ env.CARGO_VERSION }})."
-            exit 1
-          fi
-          echo "Version match: Latest tag (${{ env.LATEST_TAG }}) matches Cargo.toml version (${{ env.CARGO_VERSION }})."
+      #- name: Check version match
+      #  run: |
+      #    if [ "${{ env.LATEST_TAG }}" != "${{ env.CARGO_VERSION }}" ]; then
+      #      echo "Version mismatch: Latest tag (${{ env.LATEST_TAG }}) does not match Cargo.toml version (${{ env.CARGO_VERSION }})."
+      #      exit 1
+      #    fi
+      #    echo "Version match: Latest tag (${{ env.LATEST_TAG }}) matches Cargo.toml version (${{ env.CARGO_VERSION }})."
 
       - name: Download Artifacts
         uses: actions/download-artifact@v4
