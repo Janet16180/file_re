@@ -1,0 +1,7 @@
+line 1
+line 2
+line 3 with pattern
+line 4
+line 5 with another pattern
+line 6
+line 7
