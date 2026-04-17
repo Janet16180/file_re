@@ -60,11 +60,11 @@ pub fn open_file_full_content(file_path: &str) -> io::Result<String> {
 }
 
 
-pub fn open_file_as_reader(file_path: &str) -> io::Result<Box<dyn BufRead>> {
+pub fn open_file_as_reader(file_path: &str) -> io::Result<Box<dyn BufRead + Send>> {
     let file = File::open(file_path)?;
     let file_type = detect_file_type(file_path)?;
 
-    let reader: Box<dyn BufRead> = match file_type {
+    let reader: Box<dyn BufRead + Send> = match file_type {
         FileType::Normal => Box::new(BufReader::new(file)),
         FileType::Gz => Box::new(BufReader::new(GzDecoder::new(file))),
         FileType::Xz => Box::new(BufReader::new(XzDecoder::new(file))),

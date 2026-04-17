@@ -1,0 +1,5 @@
+first line with foo
+second line with bar
+third line ends with foo
+fourth has baz
+end

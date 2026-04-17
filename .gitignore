@@ -1,3 +1,9 @@
 **/venv/
 
 **/*.pyc
+
+# Sphinx build output
+docs/_build/
+
+# uv init stub — unused for a library
+main.py
