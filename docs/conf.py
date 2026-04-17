@@ -2,25 +2,14 @@
 
 from __future__ import annotations
 
-import sys
 from datetime import date
 from importlib import metadata
-from pathlib import Path
-
-_PACKAGE_ROOT = Path(__file__).resolve().parents[1] / "file_re" / "python"
-if str(_PACKAGE_ROOT) not in sys.path:
-    sys.path.insert(0, str(_PACKAGE_ROOT))
-
-import file_re  # noqa: E402
 
 project = "file_re"
 author = "file_re contributors"
 copyright = f"{date.today().year}, {author}"
 
-try:
-    release = metadata.version("file_re")
-except metadata.PackageNotFoundError:
-    release = file_re.__version__
+release = metadata.version("file_re")
 version = ".".join(release.split(".")[:2])
 
 extensions = [
