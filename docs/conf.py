@@ -57,11 +57,17 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
 }
 
-html_theme = "furo"
+html_theme = "sphinx_rtd_theme"
 html_title = f"file_re {release}"
 html_static_path: list[str] = []
 
+html_theme_options = {
+    "navigation_depth": 3,
+    "collapse_navigation": False,
+    "sticky_navigation": True,
+    "style_external_links": True,
+}
+
 pygments_style = "sphinx"
-pygments_dark_style = "monokai"
 
 nitpicky = False

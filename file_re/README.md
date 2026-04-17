@@ -6,7 +6,7 @@ and adds a single `max_span_lines` parameter that controls how much of
 the file is held in memory — the same API scales from small configuration
 files to 50 GB compressed logs.
 
-- **Documentation:** <https://file-re.readthedocs.io>
+- **Documentation:** <https://janet16180.github.io/file_re/>
 - **Source:** <https://github.com/Janet16180/file_re>
 
 ## Install
@@ -50,7 +50,7 @@ for m in file_re.finditer(r"\bERROR\b", "huge.log", max_span_lines=1):
   `re.VERBOSE`, `re.UNICODE`, and `re.ASCII` (with Rust-specific
   divergence notes in the docs)
 
-See the full [documentation](https://file-re.readthedocs.io) for the
+See the full [documentation](https://janet16180.github.io/file_re/) for the
 large-file guide, flag parity details, and the 1.x to 2.0 migration
 guide.
 
