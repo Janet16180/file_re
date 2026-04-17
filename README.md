@@ -1,6 +1,5 @@
 # file_re
 
-[![Documentation Status](https://readthedocs.org/projects/file-re/badge/?version=latest)](https://file-re.readthedocs.io/en/latest/)
 [![PyPI version](https://img.shields.io/pypi/v/file_re.svg)](https://pypi.org/project/file_re/)
 
 `file_re` is a Rust-backed Python library for running regular expressions
@@ -9,7 +8,7 @@ and adds a single `max_span_lines` parameter that controls how much of
 the file is held in memory — the same API scales from small
 configuration files to 50 GB compressed logs.
 
-- **Docs:** <https://file-re.readthedocs.io>
+- **Docs:** <https://janet16180.github.io/file_re/>
 - **PyPI:** <https://pypi.org/project/file_re/>
 - **Source:** this repository
 
@@ -78,7 +77,7 @@ match = file_re.search(
 ```
 
 `re.ASCII`, `re.DEBUG`, and `re.LOCALE` have Rust-specific semantics;
-see the [flags guide](https://file-re.readthedocs.io/en/latest/guides/flags.html).
+see the [flags guide](https://janet16180.github.io/file_re/guides/flags.html).
 
 ### Compiled patterns
 
@@ -130,7 +129,7 @@ if __name__ == "__main__":
         print(sum(pool.map(count_matches, shards)))
 ```
 
-See the [large files guide](https://file-re.readthedocs.io/en/latest/guides/large_files.html)
+See the [large files guide](https://janet16180.github.io/file_re/guides/large_files.html)
 for details.
 
 ## Migrating from 1.x
@@ -139,7 +138,7 @@ for details.
 `max_span_lines`, `Match.groups` now reports `None` (not `""`) for
 non-participating groups, and `search()` in window mode returns the
 first match. The full migration guide is at
-<https://file-re.readthedocs.io/en/latest/guides/migration_1_to_2.html>.
+<https://janet16180.github.io/file_re/guides/migration_1_to_2.html>.
 
 ## Development
 
