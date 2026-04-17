@@ -122,6 +122,6 @@ def test_windowed_finditer_no_overlapping_matches():
         )
 
     import re as stdlib_re
-    content = resource.read_text()
+    content = resource.read_text(encoding="utf-8")
     re_results = stdlib_re.findall(pattern, content)
     assert len(re_results) == len(results)
