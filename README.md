@@ -1,172 +1,163 @@
 # file_re
 
-`file_re` is a Python library written in Rust aimed at providing robust and efficient regular expression operations on large files, including compressed files such as `.gz` and `.xz`. The goal of this library is to handle huge files in the order of gigabytes (GB) seamlessly.
+[![Documentation Status](https://readthedocs.org/projects/file-re/badge/?version=latest)](https://file-re.readthedocs.io/en/latest/)
+[![PyPI version](https://img.shields.io/pypi/v/file_re.svg)](https://pypi.org/project/file_re/)
+
+`file_re` is a Rust-backed Python library for running regular expressions
+over large files. It mirrors the public surface of Python's `re` module
+and adds a single `max_span_lines` parameter that controls how much of
+the file is held in memory — the same API scales from small
+configuration files to 50 GB compressed logs.
+
+- **Docs:** <https://file-re.readthedocs.io>
+- **PyPI:** <https://pypi.org/project/file_re/>
+- **Source:** this repository
 
 ## Features
 
-- **Fast and efficient**: Utilizes Rust for performance improvements.
-- **Supports Large Files**: Capable of parsing files in gigabytes.
-- **Compressed Files**: Supports reading and searching within `.gz` and `.xz` compressed files.
-- **Flexible**: Similar interface to Python's built-in `re` module.
-- **Memory Efficient**: Multiple modes for handling multi-line patterns without excessive memory usage.
+- `search`, `match`, `findall`, `finditer`, and `compile` with the
+  same shape as `re`.
+- A `max_span_lines` knob: `None` for full-file scans, `1` for
+  line-by-line streaming, and `N` for a sliding N-line window.
+- Transparent `.gz` and `.xz` decompression — no special call needed.
+- Proper `re.Match` semantics, including `None` for non-participating
+  groups.
+- GIL released during IO and regex work, so `file_re` plays well with
+  `multiprocessing` and threaded pipelines.
 
-## Usage
+## Installation
 
-### Basic Usage
+```bash
+pip install file_re
+```
+
+Wheels are published for CPython 3.9 through 3.13 on Linux
+(`manylinux`/`musllinux`), macOS (x86_64 and arm64), and Windows.
+
+## Quickstart
+
+```python
+from pathlib import Path
+from file_re import file_re
+
+log = Path("server.log")
+
+# Single search, whole file in memory (re-equivalent default).
+match = file_re.search(r"ERROR: (?P<msg>.+)", log)
+if match:
+    print(match.group("msg"))
+
+# All phone numbers in a contacts file.
+phones = file_re.findall(r"(\d{3})-(\d{3})-(\d{4})", "contacts.txt")
+
+# Lazy iteration — preferred for large files.
+for match in file_re.finditer(r"\bERROR\b", log):
+    print(match.span(), match.group())
+```
+
+### Compressed files
 
 ```python
 from file_re import file_re
+
+# .gz and .xz are decoded transparently.
+matches = file_re.findall(r"(\d{3})-(\d{3})-(\d{4})", "logs/2026-04.log.gz")
+```
+
+### Flags
+
+```python
+import re
+from file_re import file_re
+
+match = file_re.search(
+    r"^error:.*$",
+    "server.log",
+    flags=re.IGNORECASE | re.MULTILINE,
+)
+```
+
+`re.ASCII`, `re.DEBUG`, and `re.LOCALE` have Rust-specific semantics;
+see the [flags guide](https://file-re.readthedocs.io/en/latest/guides/flags.html).
+
+### Compiled patterns
+
+```python
+import re
+from file_re import file_re
+
+pattern = file_re.compile(r"error: (\w+)", flags=re.IGNORECASE)
+
+for log in ("a.log", "b.log", "c.log"):
+    for match in pattern.finditer(log):
+        handle(match)
+```
+
+## Large files and `max_span_lines`
+
+`max_span_lines` is the memory-usage dial. The rest of the API is the
+same regardless of mode.
+
+```python
+from file_re import file_re
+
+# Stream line by line. A match cannot cross a newline. Cheapest mode.
+for match in file_re.finditer(r"\bERROR\b", "huge.log", max_span_lines=1):
+    handle(match)
+
+# Slide a 5-line window. A match may span at most 5 lines.
+pattern = r"BEGIN TXN\n(?:.*\n){0,3}END TXN"
+for match in file_re.finditer(pattern, "huge.log", max_span_lines=5):
+    handle(match)
+```
+
+For 50 GB logs, the recommended pattern is a process pool — each worker
+holds a bounded window, so total resident memory stays flat:
+
+```python
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
+from file_re import file_re
 
-# Define the path to the file
-file_path = Path('path/to/your/big_file.txt')
+PATTERN = r"BEGIN TXN\n(?:.*\n){0,3}END TXN"
 
-# Search for a specific pattern
-match = file_re.search(r"(\d{3})-(\d{3})-(\d{4})", file_path)
+def count_matches(shard: Path) -> int:
+    return sum(1 for _ in file_re.finditer(PATTERN, shard, max_span_lines=5))
 
-# Mimic the behavior of Python's re.search
-print("Full match:", match.group(0))
-print("Group 1:", match.group(1))
-print("Group 2:", match.group(2))
-print("Group 3:", match.group(3))
-
-match = file_re.search(r"(?P<username>[\w\.-]+)@(?P<domain>[\w]+)\.\w+", file_path)
-
-# Mimic the behavior of Python's re.search with named groups
-print("Full match:", match.group(0))
-print("Username:", match.group("username"))
-print("Domain:", match.group("domain"))
-
-# Find all matches
-matches = file_re.findall(r"(\d{3})-(\d{3})-(\d{4})", file_path)
-print(matches)
+if __name__ == "__main__":
+    shards = sorted(Path("/var/log/app").glob("*.log.gz"))
+    with ProcessPoolExecutor(max_workers=16) as pool:
+        print(sum(pool.map(count_matches, shards)))
 ```
 
-### Compressed Files
+See the [large files guide](https://file-re.readthedocs.io/en/latest/guides/large_files.html)
+for details.
 
-```python
-# You can read directly from compressed files
-file_path = Path('path/to/your/big_file.txt.gz')
-matches = file_re.findall(r"(\d{3})-(\d{3})-(\d{4})", file_path)
+## Migrating from 1.x
+
+2.0 is a breaking release: `multiline=` and `num_lines=` are replaced by
+`max_span_lines`, `Match.groups` now reports `None` (not `""`) for
+non-participating groups, and `search()` in window mode returns the
+first match. The full migration guide is at
+<https://file-re.readthedocs.io/en/latest/guides/migration_1_to_2.html>.
+
+## Development
+
+```bash
+git clone https://github.com/Janet16180/file_re.git
+cd file_re/file_re
+pip install -r requirements.txt
+maturin develop --release
+pytest unit_tests/
 ```
 
-### Multi-line Patterns
+To build the documentation locally:
 
-#### Using `multiline=True` (loads entire file into memory)
-```python
-# For regex that requires multiple lines - loads entire file
-matches = file_re.search(r"<body>[\s\S]+</body>", file_path, multiline=True)
-print(matches.group(0))
+```bash
+pip install -r docs/requirements.txt
+cd docs && make html
 ```
 
-#### Using `num_lines` (memory-efficient sliding window)
-```python
-# Memory-efficient multi-line matching using sliding window
-match = file_re.search(r"hi\nword", file_path, num_lines=2)
-print(match.group(0))
+## License
 
-# For patterns that can span multiple lines with longest match
-# This will find the longest sequence of repeated "hi\n" patterns
-match = file_re.search(r"(hi\n)+", file_path, num_lines=3)
-print(match.group(0))
-
-# Works with capturing groups and named groups
-match = file_re.search(r"(?P<greeting>hi)\n(?P<noun>word)", file_path, num_lines=2)
-print("Greeting:", match.group("greeting"))
-print("Noun:", match.group("noun"))
-
-# Also works with findall
-matches = file_re.findall(r"hi\nworld", file_path, num_lines=2)
-print(matches)
-```
-
-## Modes of Operation
-
-### 1. Single Line Mode (Default)
-- **Memory Usage**: Very low - processes one line at a time
-- **Use Case**: Patterns that don't span multiple lines
-- **Performance**: Fastest for single-line patterns
-
-```python
-match = file_re.search(r"\d+", file_path)  # Default mode
-```
-
-### 2. Multi-line Mode (`multiline=True`)
-- **Memory Usage**: High - loads entire file into RAM
-- **Use Case**: Complex patterns that need the entire file context
-- **Performance**: Fast regex operations, but high memory cost
-
-```python
-match = file_re.search(r"pattern.*\n.*pattern", file_path, multiline=True)
-```
-
-### 3. Sliding Window Mode (`num_lines=N`)
-- **Memory Usage**: Low - maintains only N lines in memory
-- **Use Case**: Multi-line patterns with limited line span
-- **Performance**: Memory efficient with good performance
-- **Behavior**: Uses a FIFO buffer of N lines, finds longest possible matches
-
-```python
-match = file_re.search(r"pattern\npattern", file_path, num_lines=2)
-```
-
-## Algorithm Details for `num_lines`
-
-The `num_lines` feature implements a sliding window algorithm:
-
-1. **Buffer Management**: Maintains a FIFO buffer of exactly `num_lines` lines
-2. **Pattern Matching**: Applies regex to the current buffer content on each line read
-3. **Longest Match**: When a match is found, continues reading `num_lines` additional lines to find the longest possible match
-4. **Memory Efficiency**: Never loads more than `num_lines` into memory at once
-
-### Example Behavior
-
-Given a file:
-```
-word
-word  
-word
-hi
-hi
-hi
-hi
-```
-
-And regex `r"(hi\n?)+"` with `num_lines=3`:
-
-1. When first "hi" is encountered, a match is found
-2. Algorithm continues for 2 more lines (num_lines)
-3. Returns the longest match: `"hi\nhi\nhi"`
-
-## Limitations
-
-1. **Default Line-by-Line Processing**:
-   - **Memory Efficiency**: By default, `file_re` reads files line by line and applies the regular expression to each line individually. This approach is memory efficient as it avoids loading the entire file into RAM.
-   - **Pattern Constraints**: This mode may not work effectively for regex patterns that span across multiple lines.
-
-2. **Multiline Mode**:
-   - **Full File Loading**: When the multiline mode is enabled, the entire file is loaded into RAM to perform the regex operation. This is necessary for regex patterns that require matching across multiple lines.
-   - **Increased RAM Usage**: Loading large files (in gigabytes) into RAM can lead to significant memory consumption. This may not be suitable for systems with limited memory.
-   - **Performance Trade-offs**: While enabling multiline mode can result in faster `findall` operations for certain patterns, it comes at the cost of higher memory usage.
-
-3. **Sliding Window Mode (`num_lines`)**:
-   - **Pattern Span Limit**: Patterns cannot span more than `num_lines` lines
-   - **Match Context**: Only finds matches within the sliding window context
-   - **Overlapping Patterns**: May find overlapping matches due to the sliding nature
-
-4. **Limited Flag Support**:
-   - **Flag Limitations**: Currently, flags such as `re.IGNORECASE` or `re.MULTILINE` are not supported as function parameters (though inline flags like `(?i)` work)
-   - **Future Enhancements**: Support for these flags is planned for future releases, which will enhance the flexibility and usability of the library.
-
-5. **Parameter Conflicts**:
-   - **Exclusive Options**: Cannot use `multiline=True` and `num_lines` together
-   - **Validation**: `num_lines` must be greater than 0
-
-## Performance Recommendations
-
-- **Small patterns within single lines**: Use default mode
-- **Large files with multi-line patterns (≤ N lines)**: Use `num_lines=N`
-- **Complex patterns requiring full file context**: Use `multiline=True` (if you have sufficient RAM)
-- **Compressed files**: All modes support `.gz` and `.xz` files transparently
-
-Users are encouraged to assess their specific needs and system capabilities when using `file_re`, especially when working with extremely large files or complex multiline regex patterns.
+See [LICENSE](LICENSE).

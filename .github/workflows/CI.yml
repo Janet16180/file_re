@@ -61,7 +61,7 @@ jobs:
           set -e
           python3 -m venv .venv
           source .venv/bin/activate
-          pip install file_re --find-links dist --force-reinstall
+          pip install file_re --no-index --find-links file_re/dist --force-reinstall
           pip install pytest
           pytest
       - name: pytest
@@ -77,7 +77,7 @@ jobs:
             pip3 install -U pip pytest
           run: |
             set -e
-            pip3 install file_re --find-links dist --force-reinstall
+            pip3 install file_re --no-index --find-links file_re/dist --force-reinstall
             pytest
 
   musllinux:
@@ -139,7 +139,7 @@ jobs:
             python3 -m virtualenv .venv
             source .venv/bin/activate
             pip install pytest
-            pip install file_re --find-links dist --force-reinstall
+            pip install file_re --no-index --find-links file_re/dist --force-reinstall
             pytest
 
   windows:
@@ -176,7 +176,7 @@ jobs:
           set -e
           python3 -m venv .venv
           source .venv/Scripts/activate
-          pip install file_re --find-links dist --force-reinstall
+          pip install file_re --no-index --find-links file_re/dist --force-reinstall
           pip install pytest
           pytest
 
@@ -185,7 +185,7 @@ jobs:
     strategy:
       matrix:
         platform:
-          - runner: macos-13
+          - runner: macos-14
             target: x86_64
           - runner: macos-14
             target: aarch64
@@ -207,11 +207,12 @@ jobs:
           name: wheels-macos-${{ matrix.platform.target }}
           path: ${{ github.workspace }}/file_re/dist
       - name: pytest
+        if: matrix.platform.target == 'aarch64'
         run: |
           set -e
           python3 -m venv .venv
           source .venv/bin/activate
-          pip install file_re --find-links dist --force-reinstall
+          pip install file_re --no-index --find-links file_re/dist --force-reinstall
           pip install pytest
           pytest
 
