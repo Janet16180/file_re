@@ -2,7 +2,7 @@ from .core import file_re_cls
 from .match import Match
 from .pattern import Pattern
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 
 file_re = file_re_cls
 search = file_re_cls.search
