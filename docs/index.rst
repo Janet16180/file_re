@@ -34,6 +34,7 @@ Highlights
    guides/large_files
    guides/flags
    guides/migration_1_to_2
+   guides/migration_2_to_3
 
 .. toctree::
    :maxdepth: 2
