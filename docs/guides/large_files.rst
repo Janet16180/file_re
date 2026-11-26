@@ -16,15 +16,24 @@ The three modes
     file size. Use this for files that comfortably fit in RAM.
 
 ``max_span_lines=1``
-    The file is streamed line by line. A match cannot cross a ``\n``.
-    Memory cost is O(longest line). This is the fastest path for big
-    files when the pattern is single-line.
+    The file is streamed in blocks. A match cannot cross a ``\n``.
+    Memory cost is one read block (256 KiB) or the longest line,
+    whichever is larger. This is the fastest path for big files when
+    the pattern is single-line.
 
 ``max_span_lines=N`` (``N > 1``)
-    The file is streamed through a sliding ``N``-line window. A match may
-    span at most ``N`` lines. Memory cost is roughly O(N x average line
-    length). This is the recommended path for multi-GB log files where
-    individual events span a known, bounded number of lines.
+    The file is streamed in blocks. A match that starts on line ``L``
+    may extend up to, but not including, the line terminator of line
+    ``L + N - 1``. Memory cost is one read block or ``N`` lines,
+    whichever is larger. This is the recommended path for multi-GB log
+    files where individual events span a known, bounded number of lines.
+
+The modes only differ in how far a match may reach. Everything else is
+the same in all three: anchors such as ``^``, ``$`` and ``\A`` refer to
+the real start and end of the file (or of each line with
+:data:`re.MULTILINE`), ``\r\n`` is read as ``\n``, and offsets are
+character offsets into the whole file. The cost of a scan does not grow
+with ``N``.
 
 Memory trade-offs
 -----------------
@@ -54,11 +63,12 @@ The choice is entirely about the pattern, not the file:
 Behavior when a match would exceed the window
 ---------------------------------------------
 
-In windowed mode, the scanner only sees ``N`` consecutive lines at a
-time. A match that would genuinely span more than ``N`` lines is simply
-never visible to the regex engine and will not be reported. If you
-suspect events can span more lines than you expect, measure the worst
-case before sizing the window.
+A match is limited to the ``N`` lines that begin with the line it starts
+on. If the pattern can match within those lines, that match is reported,
+even when a longer one would exist with a wider window; if it cannot,
+nothing is reported for that starting point. If you suspect events can
+span more lines than you expect, measure the worst case before sizing
+the window.
 
 Search returns the first match
 ------------------------------
@@ -124,9 +134,9 @@ A few notes on this pattern:
 - ``file_re`` releases the GIL while reading and matching, so a thread
   pool also works for IO-heavy workloads. A process pool is still the
   right choice when the bottleneck is the regex itself.
-- Wheels are built with the Rust ``regex`` crate's standard tuning, so
-  DFA-friendly patterns (no backreferences, no lookarounds) get the
-  best throughput.
+- Patterns that start with, or contain, a literal string get the best
+  throughput: the regex engine skips ahead with SIMD substring search
+  and only runs the automaton near candidates.
 
 Compressed files
 ----------------
